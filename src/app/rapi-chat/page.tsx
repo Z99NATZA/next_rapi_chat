@@ -78,7 +78,7 @@ const RapiChat = () => {
                     <div className="chat-header flex items-center justify-between bg-[#5350C4] px-[22px] py-[15px]">
                         <div className="chat-info flex gap-[10px] items-center">
                              <img
-                                src="https://pbs.twimg.com/profile_images/1940667268846751744/V8ymB342_400x400.jpg"
+                                src="images/nikke/rapi.jpg"
                                 width={35}
                                 height={35}
                                 alt=""
@@ -111,7 +111,7 @@ const RapiChat = () => {
                                 `}
                             >
                                 <img
-                                    src="https://pbs.twimg.com/profile_images/1940667268846751744/V8ymB342_400x400.jpg"
+                                    src="images/nikke/rapi.jpg"
                                     width={35}
                                     height={35}
                                     alt=""
@@ -133,7 +133,7 @@ const RapiChat = () => {
                         
                         <div className={`gap-[11px] items-center ${thinking ? 'flex' : 'hidden'}`}>
                             <img
-                                src="https://pbs.twimg.com/profile_images/1940667268846751744/V8ymB342_400x400.jpg"
+                                src="images/nikke/rapi.jpg"
                                 width={35}
                                 height={35}
                                 alt=""
