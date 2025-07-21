@@ -11,7 +11,8 @@ export type Message = {
 }; 
 
 interface ChatRequest {
-    message: string
+    message?: string,
+    image?: File | null,
 }
 
 interface ChatResponse {
@@ -19,44 +20,85 @@ interface ChatResponse {
 }
 
 const RapiChat = () => {
-    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [thinking, setThinking] = useState(false);
     const imageInputRef = useRef<HTMLInputElement | null>(null);
-    const [image, setImage] = useState<File | null>(null);
+    const [fileImage, setIFileImage] = useState<File | null>(null);
+    const [showButtonSubmit, setShowButtonSubmit] = useState(false);
+    const [messageText, setMessaageText] = useState<string>('');
 
-    const messageKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-        const message = textareaRef.current?.value.trim() || '';
+    useEffect(() => {
+        setShowButtonSubmit(!!(messageText || fileImage));
+    }, [
+        messageText,
+        fileImage
+    ])
 
-        if (e.key === 'Enter' && !e.shiftKey && message) {
+    const messageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const message = e.target.value.trim();
+        setShowButtonSubmit(message !== '');
+        setMessaageText(message);
+    }
+
+    const messageKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-
-            sendMessage(message);
+            sendMessage();
         }
-    }, []);
+    }, [messageText]);
 
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const message = textareaRef.current?.value.trim() || '';
-
-        sendMessage(message);
+        sendMessage();
     }
 
-    const sendMessage = async (message: string) => {
-        textareaRef.current!.value = '';
+    const sendMessage = async () => {
+        if (!messageText && !fileImage) {
+            return;
+        }
 
-        setMessages((prev) => [...prev, {
-            type: 'user',
-            content: message
-        }]);
+        const formData = new FormData();
 
-        setThinking(true);
+        if (fileImage) {
+            formData.append("message", messageText);
+            formData.append("image", fileImage);
+        }
+
+        if (fileImage) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const imageUrl = reader.result as string;
+    
+                setMessages((prev) => [...prev, {
+                    type: 'user',
+                    content: `
+                        <img src="${imageUrl}" alt="uploaded" style="display: block; margin-left: auto; width: 50%; border-radius: 13px; border-bottom-right-radius: 3px;" />
+                    `
+                }]);
+            };
+
+            reader.readAsDataURL(fileImage);
+        }
+
+        if (messageText) {
+            setMessages((prev) => [...prev, {
+                type: 'user',
+                content: messageText
+            }]);
+        }
+ 
+        setThinking(true); 
+        setMessaageText('');
+        setIFileImage(null);
+        setShowButtonSubmit(false);
 
         try {
-            const payload: ChatRequest = { message: message };
-            // const res = await api.post<ChatResponse>('/api/chat', payload);
-            // const reply = res.data.reply;
-            const reply = 'ok';
+            const res = await api.post<ChatResponse>('/api/chat', formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+            const reply = res.data.reply;
 
             setTimeout(() => {
                 setMessages((prev) => [...prev, {
@@ -77,34 +119,9 @@ const RapiChat = () => {
         imageInputRef.current?.click();
     }
 
-    const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const imageUrl = reader.result as string;
-
-            setMessages((prev) => [...prev, {
-                type: 'user',
-                content: `<img src="${imageUrl}" alt="uploaded" style="display: block; margin-left: auto; width: 50%; border-radius: 13px 13px 3px 13px; margin-top: -7px;" />`
-            }]);
-        };
-
-        reader.readAsDataURL(file);
+    const handleAddImage = (file: File | null) => {
+        setIFileImage(file);
     }
-
-    const handleAddImage = (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        
-        if (file) {
-            setImage(file);
-        }
-    }
-
-    useEffect(() => {
-        console.log(image);
-    }, [image])
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#EEEEFF] to-[#C8C7FF]">
@@ -121,8 +138,11 @@ const RapiChat = () => {
                     onKeyDown={messageKeyDown}
                     onUpload={handleFileUploadClick}
                     onFileChange={handleAddImage}
-                    textareaRef={textareaRef}
                     imageInputRef={imageInputRef}
+                    showButtonSubmit={showButtonSubmit}
+                    messageChange={messageChange}
+                    messageText={messageText}
+                    fileImage={fileImage}
                 />
             </div>
         </div>

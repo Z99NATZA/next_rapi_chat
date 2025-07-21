@@ -8,22 +8,35 @@ type ChatMessageProps = {
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
     const isImage = /^<img[\s\S]*?>$/.test(message.content.trim());
-
+ 
     return (
         <div className={`flex gap-[11px] items-center ${message.type === 'user' ? 'justify-end' : ''}`}>
             {message.type === 'bot' && (
                 <img
-                    src="images/nikke/rapi.jpg"
-                    width={35}
-                    height={35}
+                    src="images/nikke/rapi2.webp"
                     alt=""
-                    className="bot-avatar rounded-full shrink-0 mb-[2px]"
+                    className="rounded-full shrink-0 mb-[2px] object-cover w-[35px] h-[35px]"
                 />
             )}
 
-            <div className={isImage ? '' : `py-[12px] px-[16px] max-w-[75%] text-[0.95rem] rounded-[13px] ${message.type === 'bot' ? 'rounded-bl-[3px] bg-[#F2F2FF]' : 'rounded-br-[3px] bg-[#5350C4] text-white'}`}>
-                <div dangerouslySetInnerHTML={{ __html: message.content }}></div>
-            </div>
+            {isImage && (
+                <div style={{ 'maxHeight': '200px', 'overflowY': 'auto' }}>
+                    <div dangerouslySetInnerHTML={{ __html: message.content }}></div>
+                </div>
+            )}
+
+            {!isImage && (
+                <div className={`
+                    py-[12px] px-[16px] max-w-[75%] text-[0.95rem] rounded-[13px]
+                    ${
+                        message.type === 'bot' 
+                        ? 'rounded-bl-[3px] bg-[#F2F2FF]' 
+                        : (isImage ? '' : 'rounded-br-[3px] bg-[#5350C4] text-white')
+                    }
+                `}>
+                    <div dangerouslySetInnerHTML={{ __html: message.content }}></div>
+                </div>
+            )}
         </div>         
     )
 }

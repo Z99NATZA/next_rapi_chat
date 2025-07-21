@@ -6,11 +6,9 @@ const ChatHeader = () => {
             <div className="chat-header flex items-center justify-between bg-[#5350C4] h-[70px] px-[22px]">
                 <div className="chat-info flex gap-[10px] items-center">
                     <img
-                        src="images/nikke/rapi.jpg"
-                        width={35}
-                        height={35}
+                        src="images/nikke/rapi2.webp"
                         alt=""
-                        className='chatbot-logo rounded-full'
+                        className='chatbot-logo rounded-full w-[35px] h-[35px] object-cover'
                     />
                     <h2 className="logo-text text-white text-[1.31rem] p-[6px] shrink-0">
                         Rapi
