@@ -46,7 +46,7 @@ const ChatFooter = ({
     }
 
     const handleRemoveImage = () => {
-        setPreviewImage(null);
+        setPreviewImage('');
         onFileChange(null);
     }
 

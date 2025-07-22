@@ -3,17 +3,12 @@ import ChatBody from '@/components/ChatBody';
 import ChatFooter from '@/components/ChatFooter';
 import ChatHeader from '@/components/ChatHeader';
 import api from '@/utils/axios';
-import React, { ChangeEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 export type Message = {
     type: 'user' | 'bot',
     content: string,
 }; 
-
-interface ChatRequest {
-    message?: string,
-    image?: File | null,
-}
 
 interface ChatResponse {
     reply: string
@@ -26,6 +21,13 @@ const RapiChat = () => {
     const [fileImage, setIFileImage] = useState<File | null>(null);
     const [showButtonSubmit, setShowButtonSubmit] = useState(false);
     const [messageText, setMessaageText] = useState<string>('');
+
+    useEffect(() => {
+        setMessages([{
+            type: 'bot',
+            content: 'ผู้บัญชาการ'
+        }])
+    }, [])
 
     useEffect(() => {
         setShowButtonSubmit(!!(messageText || fileImage));
@@ -47,24 +49,23 @@ const RapiChat = () => {
         }
     }, [messageText]);
 
-    const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        sendMessage();
+        await sendMessage();
     }
 
     const sendMessage = async () => {
         if (!messageText && !fileImage) {
+            console.log('Require message');
             return;
         }
 
         const formData = new FormData();
+        formData.append("message", messageText);
 
         if (fileImage) {
-            formData.append("message", messageText);
             formData.append("image", fileImage);
-        }
-
-        if (fileImage) {
+            
             const reader = new FileReader();
             reader.onloadend = () => {
                 const imageUrl = reader.result as string;
@@ -100,12 +101,10 @@ const RapiChat = () => {
             });
             const reply = res.data.reply;
 
-            setTimeout(() => {
-                setMessages((prev) => [...prev, {
-                    type: 'bot',
-                    content: reply
-                }]);
-            }, 1000);
+            setMessages((prev) => [...prev, {
+                type: 'bot',
+                content: reply
+            }]);
         }
         catch (err: unknown) {
             if (err instanceof Error) console.log(err.message);
