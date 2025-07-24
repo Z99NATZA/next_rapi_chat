@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 type ChatFooterProps = {
     onSend: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -9,7 +9,6 @@ type ChatFooterProps = {
     showButtonSubmit: boolean;
     messageChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     messageText: string;
-    fileImage: File | null;
 };
 
 const ChatFooter = ({
@@ -21,15 +20,8 @@ const ChatFooter = ({
     showButtonSubmit,
     messageChange,
     messageText,
-    fileImage,
 }: ChatFooterProps) => {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!fileImage) {
-            setPreviewImage('');
-        }
-    }, [fileImage])
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0] ?? null;
@@ -38,6 +30,9 @@ const ChatFooter = ({
             const url = URL.createObjectURL(file);
             setPreviewImage(url);
             onFileChange(file);
+        }
+        else {
+            setPreviewImage('');
         }
     }
 
@@ -51,7 +46,7 @@ const ChatFooter = ({
     }
 
     return (
-        <div className="chat-footer fixed sm:absolute bottom-0 w-[100%] bg-white pt-[15px] px-[22px] pb-[20px]">
+        <div className="chat-footer z-10 fixed sm:absolute bottom-0 w-[100%] bg-white pt-[15px] px-[22px] pb-[20px]">
             <form 
                 onSubmit={onSend}
                 action="#" 
@@ -61,7 +56,7 @@ const ChatFooter = ({
                 '
             >
                 {(previewImage) && (
-                    <div className='absolute w-[50%] bottom-[calc(100%+5px)] right-[40px] p-3 bg-gray-100 rounded'>
+                    <div className='absolute w-[50%] bottom-[calc(100%+20px)] right-[40px] p-3 bg-gray-100 rounded'>
                         <button
                             onClick={handleRemoveImage}
                             type='button'
@@ -95,8 +90,8 @@ const ChatFooter = ({
                     <button 
                         type='button'
                         className="
-                            material-symbols-rounded h-[35px] w-[35px] cursor-pointer text-[#706DB0] rounded-full
-                            text-[1.15rem] hover:bg-[#f1f1ff]
+                            material-symbols-rounded h-[35px] w-[35px] text-[#706DB0] rounded-full
+                            text-[1.15rem] hover:bg-[#f1f1ff] opacity-[20%]
                         "
                     >
                         add_reaction
@@ -107,7 +102,7 @@ const ChatFooter = ({
                             ref={imageInputRef} 
                             onChange={handleImageChange}
                             type="file" 
-                            accept='images/*' 
+                            accept='image/*' 
                             hidden 
                         />
 
@@ -119,7 +114,7 @@ const ChatFooter = ({
                                 text-[1.15rem] hover:bg-[#f1f1ff]
                             "
                         >
-                            attach_file
+                            imagesmode
                         </button>
                     </div>
 

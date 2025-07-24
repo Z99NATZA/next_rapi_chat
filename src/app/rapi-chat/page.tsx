@@ -37,7 +37,8 @@ const RapiChat = () => {
     ])
 
     const messageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const message = e.target.value.trim();
+        const value = e.target.value;
+        const message = value.trim() === '' ? '' : value;
         setShowButtonSubmit(message !== '');
         setMessaageText(message);
     }
@@ -141,7 +142,6 @@ const RapiChat = () => {
                     showButtonSubmit={showButtonSubmit}
                     messageChange={messageChange}
                     messageText={messageText}
-                    fileImage={fileImage}
                 />
             </div>
         </div>
