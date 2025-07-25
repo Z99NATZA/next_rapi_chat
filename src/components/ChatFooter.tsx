@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { forwardRef, useImperativeHandle, useState } from 'react'
 
 type ChatFooterProps = {
     onSend: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -9,18 +9,16 @@ type ChatFooterProps = {
     showButtonSubmit: boolean;
     messageChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     messageText: string;
+}; 
+
+export type ChatFooterRef = {
+    setPreviewImage: (url: string | null) => void;
 };
 
-const ChatFooter = ({
-    onSend,
-    onKeyDown,
-    onUpload,
-    onFileChange,
-    imageInputRef,
-    showButtonSubmit,
-    messageChange,
-    messageText,
-}: ChatFooterProps) => {
+function ChatFooterInner(
+    props: ChatFooterProps,
+    ref: React.Ref<ChatFooterRef>
+) {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +27,7 @@ const ChatFooter = ({
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewImage(url);
-            onFileChange(file);
+            props.onFileChange(file);
         }
         else {
             setPreviewImage('');
@@ -37,19 +35,23 @@ const ChatFooter = ({
     }
 
     const handleMessageKeydown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        onKeyDown(event);
+        props.onKeyDown(event);
     }
 
     const handleRemoveImage = () => {
         setPreviewImage('');
-        onFileChange(null);
+        props.onFileChange(null);
     }
+
+    useImperativeHandle(ref, () => ({
+        setPreviewImage,
+    }))
 
     return (
         <div className="chat-footer z-10 fixed sm:absolute bottom-0 w-[100%] bg-white pt-[15px] px-[22px] pb-[20px]">
-            <form 
-                onSubmit={onSend}
-                action="#" 
+            <form
+                onSubmit={props.onSend}
+                action="#"
                 className='
                     relative flex items-center bg-white rounded-[32px] outline-[1px] outline-[#ccc]
                     focus-within:outline-[2px] focus-within:outline-[#5350C4]
@@ -75,7 +77,7 @@ const ChatFooter = ({
                 )}
 
                 <textarea
-                    value={messageText}
+                    value={props.messageText}
                     placeholder='Message...'
                     className='
                         message-input outline-none h-[47px] w-[100%] text-[0.95rem] 
@@ -83,11 +85,11 @@ const ChatFooter = ({
                     '
                     style={{ 'borderRadius': 'inherit' }}
                     onKeyDown={handleMessageKeydown}
-                    onChange={messageChange}
+                    onChange={props.messageChange}
                 ></textarea>
 
                 <div className="chat-controls flex items-center self-end pr-[6px] h-[47px] gap-[3px]">
-                    <button 
+                    <button
                         type='button'
                         className="
                             material-symbols-rounded h-[35px] w-[35px] text-[#706DB0] rounded-full
@@ -99,15 +101,15 @@ const ChatFooter = ({
 
                     <div className='file-upload-wrapper'>
                         <input
-                            ref={imageInputRef} 
+                            ref={props.imageInputRef}
                             onChange={handleImageChange}
-                            type="file" 
-                            accept='image/*' 
-                            hidden 
+                            type="file"
+                            accept='image/*'
+                            hidden
                         />
 
-                        <button 
-                            onClick={onUpload}
+                        <button
+                            onClick={props.onUpload}
                             type='button'
                             className="
                                 material-symbols-rounded h-[35px] w-[35px] cursor-pointer text-[#706DB0] rounded-full
@@ -118,7 +120,7 @@ const ChatFooter = ({
                         </button>
                     </div>
 
-                    {showButtonSubmit && (
+                    {props.showButtonSubmit && (
                         <button
                             type='submit'
                             className="
@@ -137,4 +139,6 @@ const ChatFooter = ({
     )
 }
 
-export default ChatFooter
+const ChatFooter = forwardRef(ChatFooterInner);
+export default ChatFooter;
+

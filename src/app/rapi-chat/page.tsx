@@ -1,6 +1,6 @@
 'use client'
 import ChatBody from '@/components/ChatBody';
-import ChatFooter from '@/components/ChatFooter';
+import ChatFooter, {ChatFooterRef} from '@/components/ChatFooter';
 import ChatHeader from '@/components/ChatHeader';
 import api from '@/utils/axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -21,6 +21,7 @@ const RapiChat = () => {
     const [fileImage, setIFileImage] = useState<File | null>(null);
     const [showButtonSubmit, setShowButtonSubmit] = useState(false);
     const [messageText, setMessaageText] = useState<string>('');
+    const chatFooterRef = useRef<ChatFooterRef>(null);
 
     useEffect(() => {
         setMessages([{
@@ -41,18 +42,6 @@ const RapiChat = () => {
         const message = value.trim() === '' ? '' : value;
         setShowButtonSubmit(message !== '');
         setMessaageText(message);
-    }
-
-    const messageKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    }, [messageText]);
-
-    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        await sendMessage();
     }
 
     const sendMessage = async () => {
@@ -93,6 +82,7 @@ const RapiChat = () => {
         setMessaageText('');
         setIFileImage(null);
         setShowButtonSubmit(false);
+        chatFooterRef.current?.setPreviewImage('');
 
         try {
             const res = await api.post<ChatResponse>('/api/chat', formData, {
@@ -115,13 +105,25 @@ const RapiChat = () => {
         }
     }
 
-    const handleFileUploadClick = () => {
-        imageInputRef.current?.click();
-    }
+    const messageKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }, [messageText]);
 
-    const handleAddImage = (file: File | null) => {
+    const handleSendMessage = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        await sendMessage();
+    }, [sendMessage]);
+
+    const handleFileUploadClick = useCallback(() => {
+        imageInputRef.current?.click();
+    }, []);
+
+    const handleAddImage = useCallback((file: File | null) => {
         setIFileImage(file);
-    }
+    }, []);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#EEEEFF] to-[#C8C7FF]">
@@ -134,6 +136,7 @@ const RapiChat = () => {
                 <ChatHeader />
                 <ChatBody messages={messages} thinking={thinking} />
                 <ChatFooter
+                    ref={chatFooterRef}
                     onSend={handleSendMessage}
                     onKeyDown={messageKeyDown}
                     onUpload={handleFileUploadClick}

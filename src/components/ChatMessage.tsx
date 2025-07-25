@@ -20,7 +20,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             )}
 
             {isImage && (
-                <div style={{ 'maxHeight': '200px', 'overflowY': 'auto' }}>
+                <div style={{ 'maxHeight': '2000px', 'overflowY': 'auto' }}>
                     <div dangerouslySetInnerHTML={{ __html: message.content }}></div>
                 </div>
             )}
